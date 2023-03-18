@@ -1,0 +1,55 @@
+---
+- name: Execute Docker container and Pull Docker image on DockerHub 
+  hosts: AWS_SERVER
+  become: yes
+  tasks:
+    - name: Delete Directory
+      shell: "rm -rf SS_EDUP"
+    - name: Create Directory for project
+      shell: "mkdir SS_EDUP"
+
+    - name: Enter in directory
+      shell: "cd SS_EDUP/"
+    - name: Clear all data from directory
+      shell: "rm -rf *"
+    - name: Clone GitHub repository
+      shell: "git clone https://github.com/Alkaponees/SS_EDUP.git"
+    - name: Run script
+      shell: |
+        docker kill $(docker ps -q) 2> /dev/null
+        if [[$! == 0]];then
+                docker kill $(docker ps -q)
+        fi
+        docker rm $(docker ps -aq) 2> /dev/null
+        if [[$! == 0]];then
+                docker rm $(docker ps -aq)
+        fi
+        yes | docker image prune -a
+      when: ansible_os_family == 'Debian'
+    - name: Run script
+      shell: |
+        docker kill $(docker ps -q) 2> /dev/null
+        if [[$! == 0]];then
+                docker kill $(docker ps -q)
+        fi
+        docker rm $(docker ps -aq) 2> /dev/null
+        if [[$! == 0]];then
+                docker rm $(docker ps -aq)
+        fi
+        yes | docker image prune -a
+      when: ansible_os_family == 'RedHat'
+    - name: Build docker image
+      shell: "docker build -t alkaponees/ss_edup:latest /home/ubuntu/SS_EDUP/."
+      when: ansible_os_family == "Debian"
+    - name: Build docker image
+      shell: "docker build -t alkaponees/ss_edup:latest /home/ec2-user/SS_EDUP/."
+      when: ansible_os_family == "RedHat"
+
+    - name: Run docker container
+      docker_container:
+        name: SS_EDUP_APP
+        image: alkaponees/ss_edup:latest
+        restart: yes
+        state: started
+        ports:
+          - "80:80"

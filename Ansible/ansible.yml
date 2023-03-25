@@ -27,6 +27,10 @@
             url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
             dest: /usr/local/bin/docker-compose
             mode: 'u+x,g+x'
+        - name: Install Java 17 for Ubuntu
+          apt:
+            name: openjdk-17-jdk
+            state: present
       when: ansible_os_family == "Debian"
 
     - block:
@@ -42,6 +46,10 @@
              - openssl-devel
             state: latest
 
+        - name: Install Java 17 for Amazon Linux
+          yum:
+            name: java-17-openjdk-devel
+            state: present
         - name: Start Docker service
           service:
             name: docker

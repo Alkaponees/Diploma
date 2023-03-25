@@ -49,7 +49,7 @@
         - name: Install Java 17 for Amazon Linux
           yum:
             name: java-17-openjdk-devel
-            state: present
+            state: latest
         - name: Start Docker service
           service:
             name: docker

@@ -40,6 +40,48 @@ resource "aws_security_group" "web" {
     "Name" = "Default SG"
   }
 }
+resource "aws_security_group" "TFDefault" {
+  name   = "MySecurityGroup"
+  vpc_id = aws_default_vpc.default.id
+
+  dynamic "ingress" {
+    for_each = ["3306","22","8080"]
+    content {
+      from_port   = ingress.value
+      to_port     = ingress.value
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    "Name" = "Default SG"
+  }
+}
+resource "aws_instance" "Ubuntu_Server"{
+    ami = "ami-09e1162c87f73958b"
+    instance_type = "t3.micro"
+    key_name = "Stockholm_RSA"
+    tags = {
+      "Name" = "Ubuntu_Server"
+    }
+    user_data = "${file("../bash/install_Docker_Ubuntu.sh")}"
+    vpc_security_group_ids = [aws_security_group.TFDefault.id]
+    ebs_block_device {
+      device_name = "/dev/sda1"
+      volume_type ="gp3"
+      volume_size = 10
+      encrypted = true
+      delete_on_termination = true
+
+    }
+}
 
 resource "aws_launch_configuration" "web" {
   name_prefix     = "Web server configuration"

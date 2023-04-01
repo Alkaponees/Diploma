@@ -45,7 +45,7 @@ resource "aws_security_group" "TFDefault" {
   vpc_id = aws_default_vpc.default.id
 
   dynamic "ingress" {
-    for_each = ["3306","22","8080"]
+    for_each = ["3306","22","80"]
     content {
       from_port   = ingress.value
       to_port     = ingress.value
@@ -64,14 +64,14 @@ resource "aws_security_group" "TFDefault" {
     "Name" = "Default SG"
   }
 }
-resource "aws_instance" "Ubuntu_Server"{
+resource "aws_instance" "MySQL_instance"{
     ami = "ami-09e1162c87f73958b"
     instance_type = "t3.micro"
     key_name = "Stockholm_RSA"
     tags = {
-      "Name" = "Ubuntu_Server"
+      "Name" = "MYSQL_Server"
     }
-    user_data = "${file("../bash/install_Docker_Ubuntu.sh")}"
+    user_data = "${file("../bash/install_MYSQL.sh")}"
     vpc_security_group_ids = [aws_security_group.TFDefault.id]
     ebs_block_device {
       device_name = "/dev/sda1"

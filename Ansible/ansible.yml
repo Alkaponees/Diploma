@@ -31,7 +31,24 @@
           apt:
             name: openjdk-17-jdk
             state: latest
+        - name: Restart Docker service
+          service:
+            name: docker
+            state: restarted
+            enabled: yes
+
+        - name: Start Docker service
+          service:
+            name: docker
+            state: started
+
+        - name: Add user to Docker group
+          user:
+            name: ubuntu
+            groups: docker
+            append: yes
       when: ansible_os_family == "Debian"
+
 
     - block:
         - name: Install docker-ce (centos) via amazon-linux-extras packages

@@ -141,7 +141,7 @@ resource "aws_autoscaling_group" "web" {
 
 
 resource "aws_elb" "web" {
-  name               = "Load-Balancer"
+  name               = "load-balancer"
   availability_zones = [data.aws_availability_zones.available.names[0], data.aws_availability_zones.available.names[1]]
   security_groups    = [aws_security_group.web.id]
 

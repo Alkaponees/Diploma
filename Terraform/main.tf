@@ -76,7 +76,7 @@ resource "aws_instance" "MySQL_instance"{
     ebs_block_device {
       device_name = "/dev/sda1"
       volume_type ="gp3"
-      volume_size = 10
+      volume_size = 20
       encrypted = true
       delete_on_termination = true
 
@@ -164,9 +164,7 @@ resource "aws_elb" "web" {
   }
 }
 
-output "load_balancer_url" {
-  value = aws_elb.web.dns_name
-}
+
 
 resource "aws_autoscaling_policy" "example-cpu-policy" {
   name                   = "example-cpu-policy"

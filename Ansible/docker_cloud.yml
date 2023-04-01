@@ -1,0 +1,33 @@
+---
+- name: Install petclinic application
+- hosts: AWS_SERVER
+  become: yes
+  tasks:
+    
+    - name: Run script
+      shell: |
+        docker kill $(docker ps -q) 2> /dev/null
+        if [[$! == 0]];then
+                docker kill $(docker ps -q)
+        fi
+        docker rm $(docker ps -aq) 2> /dev/null
+        if [[$! == 0]];then
+                docker rm $(docker ps -aq)
+        fi
+        yes | docker image prune -a
+      when: ansible_os_family == 'Debian'
+    - name: pull an image
+      docker_image:
+        name: alkaponees/petclinic:latest
+      when: ansible_os_family == 'Debian'
+    - name: Build docker image
+      shell: "docker build -t alkaponees/petclinic:latest /home/ubuntu/spring-petclinic/."
+      when: ansible_os_family == "Debian"
+    - name: Run docker container
+      docker_container:
+        name: Petclinic_app
+        image: alkaponees/petclinic:latest
+        restart: yes
+        state: started
+        ports:
+          - "8080:8080"

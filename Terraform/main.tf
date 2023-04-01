@@ -17,7 +17,7 @@ data "aws_ami" "latest_Ubuntu" {
   }
 }
 resource "aws_security_group" "web" {
-  name   = "MySecurityGroup"
+  name   = "Web_Security_Group"
   vpc_id = aws_default_vpc.default.id
 
   dynamic "ingress" {
@@ -37,15 +37,15 @@ resource "aws_security_group" "web" {
   }
 
   tags = {
-    "Name" = "Default SG"
+    "Name" = "Web_SG"
   }
 }
 resource "aws_security_group" "TFDefault" {
-  name   = "MySecurityGroup"
+  name   = "TFDefault_Security_Group"
   vpc_id = aws_default_vpc.default.id
 
   dynamic "ingress" {
-    for_each = ["3306","22","80"]
+    for_each = ["3306","22"]
     content {
       from_port   = ingress.value
       to_port     = ingress.value
@@ -61,7 +61,7 @@ resource "aws_security_group" "TFDefault" {
   }
 
   tags = {
-    "Name" = "Default SG"
+    "Name" = "TFDefault_SG"
   }
 }
 resource "aws_instance" "MySQL_instance"{
@@ -88,6 +88,7 @@ resource "aws_launch_configuration" "web" {
   image_id        = data.aws_ami.latest_Ubuntu.id
   instance_type   = "t3.micro"
   security_groups = [aws_security_group.web.id]
+  user_data       = file("../bash/install_Apache.sh")
   key_name = "Stockholm_RSA"
   lifecycle {
     create_before_destroy = true
@@ -119,7 +120,7 @@ resource "aws_autoscaling_group" "web" {
   min_elb_capacity     = 2
   health_check_type    = "ELB"
   vpc_zone_identifier  = [aws_default_subnet.default_az1.id, aws_default_subnet.default_az2.id]
-  load_balancers       = [aws_elb.web.name]
+  load_balancers       = ["${aws_elb.web.name}"]
 
   dynamic "tag" {
     for_each = {
@@ -163,8 +164,6 @@ resource "aws_elb" "web" {
     "Name" = "Elastic Load Balancer"
   }
 }
-
-
 
 resource "aws_autoscaling_policy" "example-cpu-policy" {
   name                   = "example-cpu-policy"

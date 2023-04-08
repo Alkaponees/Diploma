@@ -88,7 +88,7 @@ resource "aws_launch_configuration" "web" {
   image_id        = data.aws_ami.latest_Ubuntu.id
   instance_type   = "t3.micro"
   security_groups = [aws_security_group.web.id]
-  user_data       = file("../bash/install_Apache.sh")
+  user_data       = file("../bash/install_Docker.sh")
   key_name = "Stockholm_RSA"
   lifecycle {
     create_before_destroy = true

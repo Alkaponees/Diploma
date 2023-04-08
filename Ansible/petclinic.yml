@@ -6,7 +6,46 @@
     - name: Clone my repository from GitHub
       git:
         repo: https://github.com/Alkaponees/Diploma.git
-        dest: /home/user/repos/
+        dest: /home/workstation/repos/
         clone: yes
         updated: yes
-
+    - name: Clone petclinic project from GitHub
+      git:
+        repo: https://github.com/spring-projects/spring-petclinic.git
+        dest: /home/workstation/repos
+        clone: yes
+        updated: yes
+    - name: Change Dockerfile in petclinic project on mine
+      copy:
+        src: /home/workstation/repos/Diploma/Docker/Dockerfile
+        dest: /home/workstation/repos/spring-petclinic/Dockerfile
+    - name: Run script
+      shell: |
+        docker kill $(docker ps -q) 2> /dev/null
+        if [[$! == 0]];then
+                docker kill $(docker ps -q)
+        fi
+        docker rm $(docker ps -aq) 2> /dev/null
+        if [[$! == 0]];then
+                docker rm $(docker ps -aq)
+        fi
+        yes | docker image prune -a
+      when: ansible_os_family == 'Debian'
+    - name: Build docker image
+      shell: "docker build -t alkaponees/petclinic:latest /home/workstation/spring-petclinic/."
+      when: ansible_os_family == "Debian"
+    - name: Run docker container
+      docker_container:
+        name: Petclinic_app
+        image: alkaponees/petclinic:latest
+        restart: yes
+        state: started
+        ports:
+          - "8080:8080"
+    - name: Log in to DockerHub
+      docker_login:
+        username: "{{ dockerhub_username }}"
+        password: "{{ dockerhub_password }}"
+      register: docker_auth
+    - name: Push Docker image to DockerHub
+      shell: "docker push alkaponees/petclinic:latest"

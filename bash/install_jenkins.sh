@@ -1,22 +1,22 @@
 #!/bin/bash
 
 # Update the package list
-sudo apt-get update
+sudo apt update
 
 # Install Java Development Kit (JDK)
-sudo apt-get install -y default-jdk
+sudo apt install openjdk-11-jdk -y
 
 # Add the Jenkins repository key
-wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key |sudo gpg --dearmor -o /usr/share/keyrings/jenkins.gpg
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
 
 # Add the Jenkins repository to the system
-sudo sh -c 'echo deb [signed-by=/usr/share/keyrings/jenkins.gpg] http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
 
 # Update the package list to include Jenkins
-sudo apt-get update
+sudo apt update
 
 # Install Jenkins
-sudo apt-get install -y jenkins
+sudo apt install -y jenkins
 
 # Start the Jenkins service
 sudo systemctl start jenkins
